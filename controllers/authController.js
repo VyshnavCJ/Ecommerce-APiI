@@ -7,6 +7,8 @@ const CustomError = require("../errors");
 //model
 const User = require("../models/user");
 
+const { attachCookieToResponse } = require("../utils");
+
 const register = async (req, res) => {
   const { email, name, password } = req.body;
   const emailAlreadyExists = await User.findOne({ email });
@@ -17,7 +19,11 @@ const register = async (req, res) => {
   const isFirstAccount = (await User.countDocuments({})) === 0;
   const role = isFirstAccount ? "admin" : "user";
   const user = await User.create({ name, email, password, role });
-  res.status(StatusCode.CREATED).json({ user });
+  const tokenUser = { name: user.name, userId: user._id, role: user.role };
+
+  attachCookieToResponse({ res, user: tokenUser });
+
+  res.status(StatusCode.CREATED).json({ user: tokenUser });
 };
 
 const login = async (req, res) => {

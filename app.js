@@ -11,8 +11,10 @@ const app = express();
 
 //MongoDB connection
 const connectDB = require("./db/connect");
-const morgan = require("morgan");
 
+//package
+const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 //routes
 const authRouter = require("./routes/authRoutes");
 
@@ -21,13 +23,17 @@ const port = process.env.PORT || 5000;
 
 app.use(morgan("tiny"));
 app.use(express.json());
-
+app.use(cookieParser(process.env.JWT_SECRET));
 //middleware
 
 app.get("/", (req, res) => {
-  res.send("E-commerce=api");
+  res.send("E-commerce api");
 });
 
+app.get("/api/v1", (req, res) => {
+  console.log(req.signedCookies);
+  res.send("E-commerce api");
+});
 app.use("/api/v1/auth", authRouter);
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
