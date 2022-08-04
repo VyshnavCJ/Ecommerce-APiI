@@ -27,10 +27,28 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  res.send("login");
+  const { email, password } = req.body;
+  if (!email) throw new CustomError.BadRequestError("Plz provide Email");
+  if (!password) throw new CustomError.BadRequestError("Plz provide Password");
+
+  const user = await User.findOne({ email });
+  if (!user) throw new CustomError.UnauthenticatedError("Invalid Credentials");
+  isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect)
+    throw new CustomError.UnauthenticatedError("Invalid Credentials");
+
+  const tokenUser = { name: user.name, userId: user._id, role: user.role };
+
+  attachCookieToResponse({ res, user: tokenUser });
+
+  res.status(StatusCode.OK).json({ user: tokenUser });
 };
 const logout = async (req, res) => {
-  res.send("logout");
+  res.cookie("token", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.status(StatusCode.OK).json({ msg: "Logged out" });
 };
 
 module.exports = { register, login, logout };
