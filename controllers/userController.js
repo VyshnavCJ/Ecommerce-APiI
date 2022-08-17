@@ -1,20 +1,52 @@
 const { StatusCodes } = require("http-status-codes");
 const CustomErrors = require("../errors");
+const User = require("../models/user");
+const { createTokenUser, attachCookieToResponse } = require("../utils");
 
 const getAllUser = async (req, res) => {
-  res.send("Get All User");
+  console.log(req.user);
+  const users = await User.find({ role: "user" }).select("-password");
+  res.status(StatusCodes.OK).json({ users });
 };
 const getSingleUser = async (req, res) => {
-  res.send("Get Single User");
+  const user = await User.find({ _id: req.params.id }).select("-password");
+  if (!user)
+    throw new CustomErrors.NotFoundError(`No user with id : ${req.params.id}`);
+
+  res.status(StatusCodes.OK).json({ user });
 };
 const showCurrentUser = async (req, res) => {
-  res.send("Get Current User");
+  res.status(StatusCodes.OK).json({ user: req.user });
 };
 const updateUser = async (req, res) => {
-  res.send("Get Update  User");
+  const { name, email } = req.body;
+  if (!name || !email) {
+    throw new CustomErrors.BadRequestError("Plz provide both values");
+  }
+  const user = await User.findById(req.user.userId);
+  user.email = email;
+  user.name = name;
+  await user.save();
+  const tokenUser = createTokenUser(user);
+  attachCookieToResponse({ res, user: tokenUser });
+  res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 const updateUserPassword = async (req, res) => {
-  res.send("Get Update Password User");
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword) {
+    throw new CustomErrors.BadRequestError("Plz provide both values");
+  }
+  const user = await User.findById(req.user.userId);
+  // if (!user) {
+  //   throw new CustomErrors.UnauthenticatedError("User not found");
+  // }
+  const isPasswordCorrect = await user.comparePassword(oldPassword);
+  if (!isPasswordCorrect) {
+    throw new CustomErrors.UnauthenticatedError("Invalid Credentials");
+  }
+  user.password = newPassword;
+  await user.save();
+  res.status(StatusCodes.OK).json({ msg: "Success! Password Updated" });
 };
 
 module.exports = {
