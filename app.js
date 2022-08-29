@@ -18,6 +18,7 @@ const connectDB = require("./db/connect");
 //package
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const fileUpload = require("express-fileupload");
 
 //routes
 const authRouter = require("./routes/authRoutes");
@@ -29,6 +30,8 @@ const port = process.env.PORT || 5000;
 app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use(express.static("./public"));
+app.use(fileUpload());
 //middleware
 
 app.get("/", (req, res) => {

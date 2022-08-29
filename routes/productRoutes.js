@@ -16,20 +16,17 @@ const {
   authorizePermissions,
 } = require("../middleware/authentication");
 
-router.route("/").get(authenticateUser, getAllProduct);
-
 router
-  .route("/updateProduct")
-  .patch(authenticateUser, authorizePermissions("admin"), updateProduct);
+  .route("/")
+  .get(getAllProduct)
+  .post([authenticateUser, authorizePermissions("admin"), createProduct]);
 router
   .route("/uploadImage")
   .post(authenticateUser, authorizePermissions("admin"), uploadImage);
 router
-  .route("/createProduct")
-  .put(authenticateUser, authorizePermissions("admin"), createProduct);
-router
-  .route("/deleteProduct")
-  .delete(authenticateUser, authorizePermissions("admin"), createProduct);
-router.route("/:id").get(authenticateUser, getSingleProduct);
+  .route("/:id")
+  .get(getSingleProduct)
+  .delete([authenticateUser, authorizePermissions("admin")], deleteProduct)
+  .patch([authenticateUser, authorizePermissions("admin")], updateProduct);
 
 module.exports = router;
