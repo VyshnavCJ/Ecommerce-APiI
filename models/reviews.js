@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-ReviewSchema = new mongoose.Schema(
+const ReviewSchema = mongoose.Schema(
   {
     title: {
       type: String,
@@ -33,4 +33,4 @@ ReviewSchema = new mongoose.Schema(
 );
 
 ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
-module.export = mongoose.model("Review", ReviewSchema);
+module.exports = mongoose.model("Review", ReviewSchema);
