@@ -1,6 +1,6 @@
 # E-Commerce API
 
-[E=Commerce API URL](https://e-commerce-api-cj.herokuapp.com/)
+[E-Commerce API](https://e-commerce-api-cj.herokuapp.com/)
 
 #### Setup
 
